@@ -3,40 +3,25 @@ import { galleryItems } from "./gallery-items.js";
 
 ////////////////////////////////////////////////////////////////////////////////////////////////////////
 
-// Создание галереи
-
-console.log(galleryItems);
-
 const gallery = document.querySelector("ul.gallery");
 
-const imgArray = [];
-
 galleryItems.map((element) => {
-  const li = document.createElement("li");
-  const a = document.createElement("a");
-  const img = document.createElement("img");
-
-  li.classList.add("gallery__item");
-  a.classList.add("gallery__link");
-  img.classList.add("gallery__image");
-  //   li.maxWidth = "100%";
-  //   li.maxHeight = "100%";
-
-  img.src = element.preview;
-  img.alt = element.description;
-  img.source = element.original;
-  // a.href = element.original;
-
-  //   img.style.width = "100%";
-  //   img.style.height = "100%";
-  //   img.style.objectFit = "cover";
-
-  a.append(img);
-  li.append(a);
-  imgArray.push(li);
+  gallery.insertAdjacentHTML(
+    "beforeend",
+    `  
+<li class="gallery__item">
+    <a class="gallery__link" hreff="${element.original}">
+      <img
+        class="gallery__image"
+        src="${element.preview}"
+        data-source="${element.original}"
+        alt="${element.description}"
+      />
+    </a>
+  </li>
+  `
+  );
 });
-
-gallery.append(...imgArray);
 
 ////////////////////////////////////////////////////////////////////////////////////////////////////////
 
@@ -48,21 +33,24 @@ function openModal(src) {
   <img src=${src}></img>
 `,
     {
-      closable: true,
+      onShow: (instance) => {
+        document.onkeydown = (event) => {
+          let isEscape = event.key === "Escape";
+          if (isEscape) {
+            instance.close();
+          }
+        };
+      },
     }
   );
-  return instance;
+  instance.show();
 }
 
 gallery.addEventListener("click", (event) => {
-  openModal(event.target.source).show((instance) => {
-    document.addEventListener("keydown", (event) => {
-      // Закрытие модального окна с помощью esc
-      if (event.key == "Escape" && basicLightbox.visible()) {
-        instance.close();
-      }
-    });
-  });
+  const dataSource = event.target.getAttribute("data-source");
+  if (dataSource !== null) {
+    openModal(dataSource);
+  }
 });
 
 ////////////////////////////////////////////////////////////////////////////////////////////////////////
